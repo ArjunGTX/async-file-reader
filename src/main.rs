@@ -1,20 +1,16 @@
-#[tokio::main]
-async fn main() {
-    let handle = tokio::spawn(async {
-        read_file_1().await;
-        read_file_2().await
+use std::fs;
+use std::thread;
+fn main() {
+    let handle1 = thread::spawn(|| {
+        println!("File one started");
+        let file = fs::read_to_string("./src/test1.txt").unwrap();
+        println!("{}", file);
     });
-    handle.await.unwrap();
-}
-
-async fn read_file_1() {
-    let result = tokio::fs::read_to_string("./src/test1.txt").await;
-    let content = result.unwrap();
-    println!("{}", content)
-}
-
-async fn read_file_2() {
-    let result = tokio::fs::read_to_string("./src/test2.txt").await;
-    let content = result.unwrap();
-    println!("{}", content)
+    let handle2 = thread::spawn(|| {
+        println!("File two started");
+        let file = fs::read_to_string("./src/test2.txt").unwrap();
+        println!("{}", file);
+    });
+    handle1.join().unwrap();
+    handle2.join().unwrap();
 }
