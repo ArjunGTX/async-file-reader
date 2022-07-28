@@ -21,10 +21,19 @@ fn async_file() {
 }
 
 fn word_count() {
-    let file = fs::read_to_string("./src/test1.txt").unwrap();
+    let files = fs::read_dir("./src").unwrap();
     let mut count = 0;
-    for _word in file.split_whitespace() {
-        count += 1;
+    for file in files {
+        let path = match file {
+            Ok(file) => file,
+            Err(err) => {
+                panic!("Could not read file: {}", err)
+            }
+        };
+        let content = fs::read_to_string(path.path()).unwrap();
+        for _word in content.split_whitespace() {
+            count += 1;
+        }
     }
-    println!("{}", count)
+    println!("{:?}", count)
 }
