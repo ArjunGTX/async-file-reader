@@ -1,26 +1,44 @@
 use std::fs;
-use std::thread;
-fn main() {
-    // async_file();
-    word_count();
+#[tokio::main]
+async fn main() {
+    async_file().await;
 }
 
-fn async_file() {
-    let handle1 = thread::spawn(|| {
-        println!("File one started");
-        let file = fs::read_to_string("./src/test1.txt").unwrap();
-        println!("{}", file);
-    });
-    let handle2 = thread::spawn(|| {
-        println!("File two started");
-        let file = fs::read_to_string("./src/test2.txt").unwrap();
-        println!("{}", file);
-    });
-    handle1.join().unwrap();
-    handle2.join().unwrap();
+async fn async_file() {
+    let handles = vec![
+        tokio::spawn(async {
+            read_file_1().await;
+        }),
+        tokio::spawn(async {
+            read_file_2().await;
+        }),
+        tokio::spawn(async {
+            get_count().await;
+        }),
+    ];
+    for handle in handles {
+        handle.await.unwrap();
+    }
 }
 
-fn word_count() {
+async fn read_file_1() {
+    println!("reading file 1");
+    let content = read_file("./src/test1.txt").await;
+    println!("{}", content);
+}
+
+async fn read_file_2() {
+    println!("reading file 2");
+    let content = read_file("./src/test2.txt").await;
+    println!("{}", content);
+}
+
+async fn read_file(path: &str) -> String {
+    let file = fs::read_to_string(path).unwrap();
+    file
+}
+
+async fn get_count() {
     let files = fs::read_dir("./src").unwrap();
     let mut count = 0;
     for file in files {
@@ -35,5 +53,5 @@ fn word_count() {
             count += 1;
         }
     }
-    println!("{:?}", count)
+    println!("{}", count);
 }
